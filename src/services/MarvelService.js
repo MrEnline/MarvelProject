@@ -19,7 +19,7 @@ class MarvelService {
     }
 
     getCharacter = (id) => {
-        return this.getResource(`${this._apiBase}${id}?${this._apiKey}`);
+        return this.getResource(`${this._apiBase}characters/${id}?${this._apiKey}`);
     }
 }
 
