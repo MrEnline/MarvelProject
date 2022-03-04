@@ -14,7 +14,9 @@ class CharList extends Component {
 
     marvelService = new MarvelService();
 
-    //хук, который отрабатавает при создании компонента перед рендером
+    // componentDidMount() вызывается сразу после монтирования (то есть, вставки компонента в DOM). 
+    // В этом методе должны происходить действия, которые требуют наличия DOM-узлов. 
+    // Это хорошее место для создания сетевых запросов.
     componentDidMount() {
         this.marvelService.getAllCharacters()
                           .then(this.onCharListLoaded)  //если получаем результат, то вызываем onCharListLoaded и передаем в него результат
@@ -40,7 +42,8 @@ class CharList extends Component {
         
             return(
                 <li className="char__item"
-                    key={item.id}>
+                    key={item.id}
+                    onClick={() => this.props.onCharSelected(item.id)}>
                             <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
                             <div className="char__name">{item.name}</div>
                 </li>
