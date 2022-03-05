@@ -1,5 +1,5 @@
 import './charInfo.scss';
-import thor from '../../resources/img/thor.jpeg';
+import PropTypes from 'prop-types';
 import { Component } from 'react';
 import MarvelService from '../../services/MarvelService';
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -118,6 +118,11 @@ const View = ({char}) => {
             </ul>
         </>
     )
+}
+
+//проверка получаемого пропса на тип, который нам требуется
+CharInfo.propTypes = {
+    charId: PropTypes.number
 }
 
 export default CharInfo;
