@@ -9,7 +9,10 @@ class CharList extends Component {
     state = {
         charList: [],
         loading: true,
-        error: false
+        error: false,
+        newItemLoading: false,
+        offset: 210,
+        charEnded: false
     }
 
     marvelService = new MarvelService();
@@ -18,15 +21,32 @@ class CharList extends Component {
     // В этом методе должны происходить действия, которые требуют наличия DOM-узлов. 
     // Это хорошее место для создания сетевых запросов.
     componentDidMount() {
-        this.marvelService.getAllCharacters()
-                          .then(this.onCharListLoaded)  //если получаем результат, то вызываем onCharListLoaded и передаем в него результат
-                          .catch(this.onError) //при ошибке вызываем метод onError
+        this.onRequest();
     }
 
-    onCharListLoaded = (charList) => {
+    onRequest = (offset) => {
+        this.onCharListLoading();
+        this.marvelService.getAllCharacters(offset)     //если не задан offset, то используется опциональный параметр в данном методе
+                          .then(this.onCharListLoaded)  //если получаем результат, то вызываем onCharListLoaded и передаем в него результат
+                          .catch(this.onError)          //при ошибке вызываем метод onError
+    }
+
+    onCharListLoading = () => {
         this.setState({
-            charList,
-            loading: false})
+            newItemLoading : true
+        })
+    }
+
+    onCharListLoaded = (newCharList) => {
+        let ended = newCharList.length < 9 ? true : false;
+
+        this.setState(({charList, offset}) => ({
+            charList: [...charList, ...newCharList],
+            loading: false,
+            newItemLoading: false,
+            offset: offset + 9,
+            charEnded: ended
+        }))
     }
 
     onError = () => {
@@ -58,7 +78,7 @@ class CharList extends Component {
     }
     
     render() {
-        const {charList, loading, error} = this.state;
+        const {charList, loading, error, newItemLoading, offset, charEnded} = this.state;
         const items = this.renderItems(charList);
         const errorMessage = error ? <ErrorMessage/> : null;
         const spinner = loading ? <Spinner/> : null;
@@ -69,7 +89,10 @@ class CharList extends Component {
                 {spinner}
                 {errorMessage}
                 {content}
-                <button className="button button__main button__long">
+                <button className="button button__main button__long"
+                        disabled={newItemLoading}
+                        onClick={() => this.onRequest(offset)}
+                        style={{'display' : charEnded ? 'none' : 'block'}}>
                     <div className="inner">load more</div>
                 </button>
             </div>
