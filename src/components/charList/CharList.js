@@ -54,8 +54,23 @@ class CharList extends Component {
         this.setState({error: true})
     }
 
+    itemRefs = [];
+
+    //в массив добавим реф(ссылки) на элементы li в DOM-структуре
+    setRef = (elem) => {
+        this.itemRefs.push(elem)
+    }
+
+    focusOnItem = (id) => {
+        this.itemRefs.forEach(item => {
+            item.classList.remove("char__item_selected");
+        })
+        this.itemRefs[id].classList.add("char__item_selected")
+        this.itemRefs[id].focus();
+    }
+
     renderItems(arr) {
-        const newCharList = arr.map(item => {
+        const newCharList = arr.map((item, i) => {
             let imgStyle = {'objectFit' : 'cover'};
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
                 imgStyle = {'objectFit' : 'unset'};
@@ -64,7 +79,18 @@ class CharList extends Component {
             return(
                 <li className="char__item"
                     key={item.id}
-                    onClick={() => this.props.onCharSelected(item.id)}>
+                    ref={this.setRef}
+                    tabIndex={0}
+                    onClick={() => {
+                                this.props.onCharSelected(item.id);
+                                this.focusOnItem(i);
+                    }}
+                    onKeyPress={(e) => {
+                        if (e.key === " " || e.key === "Enter") {
+                            this.props.onCharSelected(item.id);
+                            this.focusOnItem(i);
+                        }
+                    }}>
                             
                             <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
                             <div className="char__name">{item.name}</div>
