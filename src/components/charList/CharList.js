@@ -1,6 +1,6 @@
 import './charList.scss';
 import { useState, useEffect, useRef } from 'react';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import PropTypes from 'prop-types'; 
@@ -8,13 +8,11 @@ import PropTypes from 'prop-types';
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
     
-    const marvelService = new MarvelService();
+    const {loading, error, getAllCharacters} = useMarvelService();
 
     // componentDidMount() вызывается сразу после монтирования (то есть, вставки компонента в DOM). 
     // В этом методе должны происходить действия, которые требуют наличия DOM-узлов. 
@@ -27,32 +25,22 @@ const CharList = (props) => {
     //и один раз, потому что пустой массив данных []
     //идеальное место для создания сетевых запросов
     useEffect(() => {
-        onRequest();
+        onRequest(offset, true);
     }, [])
 
-    const onRequest = (offset) => {
-        onCharListLoading();
-        marvelService.getAllCharacters(offset)     //если не задан offset, то используется опциональный параметр в данном методе
+    const onRequest = (offset, initial) => {
+        initial ? setNewItemLoading(true) : setNewItemLoading(true);
+        getAllCharacters(offset)     //если не задан offset, то используется опциональный параметр в данном методе
                           .then(onCharListLoaded)  //если получаем результат, то вызываем onCharListLoaded и передаем в него результат
-                          .catch(onError)          //при ошибке вызываем метод onError
-    }
-
-    const onCharListLoading = () => {
-        setNewItemLoading(true);
     }
 
    const  onCharListLoaded = (newCharList) => {
         let ended = newCharList.length < 9 ? true : false;
 
         setCharList(charList => [...charList, ...newCharList]); //коллбэк используется, потому что требуется предыдущее значение
-        setLoading(false);
         setNewItemLoading(false);
         setOffset(offset => offset + 9);
         setCharEnded(charEnded => ended);
-    }
-
-    const onError = () => {
-        setLoading(true);
     }
 
     const itemRefs = useRef([]);
@@ -110,13 +98,14 @@ const CharList = (props) => {
     const items = renderItems(charList);
     const errorMessage = error ? <ErrorMessage/> : null;
     const spinner = loading ? <Spinner/> : null;
-    const content = !(loading || error) ? items : null;
-
+    //const content = !(loading || error) ? items : null; удалим, потому что постоянно из-за этого перерендеривается компонент
+    
+    //вместо content добавим items, чтобы компонент не перерендеривался за счет использования useRef
     return (
         <div className="char__list">
             {spinner}
             {errorMessage}
-            {content}
+            {items} 
             <button className="button button__main button__long"
                     disabled={newItemLoading}
                     onClick={() => onRequest(offset)}
