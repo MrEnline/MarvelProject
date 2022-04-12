@@ -17,7 +17,7 @@ const SingleComic = (props) => {
     const updateComics = () => {
         const {comicsId} = props.comicsId;
         clearError();
-        getComics(7373)
+        getComics(comicsId)
                     .then(onComicsLoaded)
     }
 

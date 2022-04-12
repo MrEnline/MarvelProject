@@ -27,7 +27,6 @@ const App = () => {
 
     const onComicsSelected = (id) => {
         setComics(id);
-        console.log(id);
     }
 
     return (
