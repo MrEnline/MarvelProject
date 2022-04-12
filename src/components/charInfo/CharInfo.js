@@ -12,11 +12,6 @@ const CharInfo = (props) => {
 
     const {loading, error, getCharacter, clearError} = useMarvelService();
 
-    //загрузка данных по персонажу закончена
-    const onCharLoaded = (char) => {
-        setChar(char);
-    }
-
     // componentDidMount() {
     //     this.updateChar();
     // }
@@ -43,6 +38,11 @@ const CharInfo = (props) => {
                     .then(onCharLoaded);
         
         //this.foo.bar = 0; добавлена строчка для имитации ошибки
+    }
+
+    //загрузка данных по персонажу закончена
+    const onCharLoaded = (char) => {
+        setChar(char);
     }
 
     const skeleton = char || error || loading ? null : <Skeleton/>

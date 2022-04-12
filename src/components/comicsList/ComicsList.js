@@ -6,7 +6,7 @@ import useMarvelService from '../../services/MarvelService';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Spinner from '../spinner/Spinner';
 
-const ComicsList = () => {
+const ComicsList = (props) => {
     
     const [comicsList, setComicsList] = useState([]);
     const [newItemLoading, setNewItemLoading] = useState(false);
@@ -35,9 +35,13 @@ const ComicsList = () => {
     }
 
     function renderItems(arr) {
-        const newComicList = arr.map((item, i) => {
+        const newComicsList = arr.map((item, i) => {
             return(
-                <li className="comics__item">
+                <li className="comics__item" 
+                    key={i}
+                    onClick={() => {
+                        props.onComicsSelected(item.id)
+                    }}>
                     <a href="#">
                         <img src={item.thumbnail} alt={item.title} className="comics__item-img"/>
                         <div className="comics__item-name">{item.title}</div>
@@ -49,7 +53,7 @@ const ComicsList = () => {
 
         return (
             <ul className="comics__grid">
-                {newComicList}
+                {newComicsList}
             </ul>
         ) 
     }

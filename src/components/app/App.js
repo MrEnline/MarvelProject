@@ -4,6 +4,7 @@ import CharList from "../charList/CharList";
 import CharInfo from "../charInfo/CharInfo";
 import ComicsList from "../comicsList/ComicsList";
 import ErrorBoundary from "../errorBoundary/ErrorBoundary";
+import SingleComic from "../singleComic/SingleComic";
 
 import decoration from '../../resources/img/vision.png';
 
@@ -18,9 +19,15 @@ import { useState } from "react";
 const App = () => {
     
     const [selectedChar, setChar] = useState(null);
+    const [selectedComics, setComics] = useState(null);
 
     const onCharSelected = (id) => {
         setChar(id);
+    }
+
+    const onComicsSelected = (id) => {
+        setComics(id);
+        console.log(id);
     }
 
     return (
@@ -28,8 +35,11 @@ const App = () => {
             <AppHeader/>
             <main>
                 <ErrorBoundary>
-                    <ComicsList/>
+                    <ComicsList onComicsSelected={onComicsSelected}/>
                 </ErrorBoundary>
+                {/* <ErrorBoundary>
+                    <SingleComic comicsId={selectedComics}/>
+                </ErrorBoundary> */}
                 {/* <ErrorBoundary>
                     <RandomChar/>
                 </ErrorBoundary>
