@@ -3,7 +3,6 @@ import RandomChar from '../randomChar/RandomChar';
 import CharList from '../charList/CharList';
 import CharInfo from '../charInfo/CharInfo';
 import ErrorBoundary from '../errorBoundary/ErrorBoundary';
-import SingleComic from '../singleComic/SingleComic';
 
 import decoration from '../../resources/img/vision.png';
 
