@@ -9,7 +9,7 @@ import Skeleton from '../skeleton/Skeleton';
 const CharInfo = (props) => {
     const [char, setChar] = useState(null);
 
-    const { loading, error, getCharacter, clearError } = useMarvelService();
+    const { loading, error, getCharacter, clearError, process, setProcess } = useMarvelService();
 
     // componentDidMount() {
     //     this.updateChar();
@@ -31,7 +31,10 @@ const CharInfo = (props) => {
         const { charId } = props;
         if (!charId) return;
         clearError();
-        getCharacter(charId).then(onCharLoaded);
+        //установим здесь вручную состояние setProcess('confirmed') процесса загрузки
+        getCharacter(charId)
+            .then(onCharLoaded)
+            .then(() => setProcess('confirmed'));
 
         //this.foo.bar = 0; добавлена строчка для имитации ошибки
     };
@@ -41,19 +44,22 @@ const CharInfo = (props) => {
         setChar(char);
     };
 
-    const skeleton = char || error || loading ? null : <Skeleton />;
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(error || loading || !char) ? <View char={char} /> : null;
+    const setContent = (process, char) => {
+        switch (process) {
+            case 'waiting':
+                return <Skeleton />;
+            case 'loading':
+                return <Spinner />;
+            case 'confirmed':
+                return <View char={char} />;
+            case 'error':
+                return <ErrorMessage />;
+            default:
+                throw new Error('Unexpected process state');
+        }
+    };
 
-    return (
-        <div className="char__info">
-            {skeleton}
-            {errorMessage}
-            {spinner}
-            {content}
-        </div>
-    );
+    return <div className="char__info">{setContent(process, char)}</div>;
 };
 
 const View = ({ char }) => {
