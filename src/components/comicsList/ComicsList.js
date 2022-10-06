@@ -1,9 +1,24 @@
 import './comicsList.scss';
 import { useState, useEffect } from 'react';
 import useMarvelService from '../../services/MarvelService';
-import ErrorMessage from '../errorMessage/ErrorMessage';
-import Spinner from '../spinner/Spinner';
 import { Link } from 'react-router-dom';
+import Spinner from '../spinner/Spinner';
+import ErrorMessage from '../errorMessage/ErrorMessage';
+
+const setContent = (process, Component, newItemLoading) => {
+    switch (process) {
+        case 'waiting':
+            return <Spinner />;
+        case 'loading':
+            return newItemLoading ? <Component /> : <Spinner />;
+        case 'confirmed':
+            return <Component />;
+        case 'error':
+            return <ErrorMessage />;
+        default:
+            throw new Error('Unexpected process state');
+    }
+};
 
 const ComicsList = (props) => {
     const [comicsList, setComicsList] = useState([]);
@@ -11,7 +26,7 @@ const ComicsList = (props) => {
     const [offset, setOffset] = useState(0);
     const [comicsEnded, setComicsEnded] = useState(false);
 
-    const { loading, error, getAllComics } = useMarvelService();
+    const { getAllComics, process, setProcess } = useMarvelService();
 
     useEffect(() => {
         onRequest(offset, true);
@@ -20,7 +35,8 @@ const ComicsList = (props) => {
     const onRequest = (offset, initial) => {
         initial ? setNewItemLoading(true) : setNewItemLoading(true);
         getAllComics(offset) //если не задан offset, то используется опциональный параметр в данном методе
-            .then(onComicListLoaded); //если получаем результат, то вызываем onCharListLoaded и передаем в него результат
+            .then(onComicListLoaded) //если получаем результат, то вызываем onCharListLoaded и передаем в него результат
+            .then(() => setProcess('confirmed')); //после загрузки данных устанавливаем состояние для перерендера
     };
 
     const onComicListLoaded = (newComicsList) => {
@@ -43,11 +59,7 @@ const ComicsList = (props) => {
                     }}
                 >
                     <Link to={`/comics/${item.id}`}>
-                        <img
-                            src={item.thumbnail}
-                            alt={item.title}
-                            className="comics__item-img"
-                        />
+                        <img src={item.thumbnail} alt={item.title} className="comics__item-img" />
                         <div className="comics__item-name">{item.title}</div>
                         <div className="comics__item-price">{item.price}</div>
                     </Link>
@@ -58,16 +70,14 @@ const ComicsList = (props) => {
         return <ul className="comics__grid">{newComicsList}</ul>;
     }
 
-    const items = renderItems(comicsList);
+    // const items = renderItems(comicsList);
 
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading && !newItemLoading ? <Spinner /> : null;
+    // const errorMessage = error ? <ErrorMessage /> : null;
+    // const spinner = loading && !newItemLoading ? <Spinner /> : null;
 
     return (
         <div className="comics__list">
-            {errorMessage}
-            {spinner}
-            {items}
+            {setContent(process, () => renderItems(comicsList), newItemLoading)}
             <button
                 className="button button__main button__long"
                 disabled={newItemLoading}

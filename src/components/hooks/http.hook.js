@@ -1,12 +1,9 @@
 import { useState, useCallback } from 'react';
 
 export const useHttp = () => {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
     const [process, setProcess] = useState('waiting');
 
     const request = useCallback(async (url, method = 'GET', body = null, headers = { 'Content-type': 'application/json' }) => {
-        setLoading(true);
         setProcess('loading');
 
         try {
@@ -17,21 +14,17 @@ export const useHttp = () => {
             }
 
             const data = await response.json();
-            setLoading(false);
             //setProcess('confirmed'); - лучше установить вручную из-за того что данные data придут позже, чем установится данное состояние
             return data;
         } catch (e) {
-            setLoading(false);
-            setError(e.message);
             setProcess('error');
             throw e;
         }
     }, []);
 
     const clearError = useCallback(() => {
-        setError(null);
         setProcess('loading');
     }, []);
 
-    return { loading, request, error, clearError, process, setProcess };
+    return { request, clearError, process, setProcess };
 };

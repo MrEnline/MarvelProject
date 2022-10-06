@@ -1,10 +1,25 @@
 import './charList.scss';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import PropTypes from 'prop-types';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+
+const setContent = (process, Component, newItemLoading) => {
+    switch (process) {
+        case 'waiting':
+            return <Spinner />;
+        case 'loading':
+            return newItemLoading ? <Component /> : <Spinner />;
+        case 'confirmed':
+            return <Component />;
+        case 'error':
+            return <ErrorMessage />;
+        default:
+            throw new Error('Unexpected process state');
+    }
+};
 
 const CharList = (props) => {
     const [charList, setCharList] = useState([]);
@@ -12,7 +27,7 @@ const CharList = (props) => {
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
 
-    const { loading, error, getAllCharacters } = useMarvelService();
+    const { getAllCharacters, process, setProcess } = useMarvelService();
 
     // componentDidMount() вызывается сразу после монтирования (то есть, вставки компонента в DOM).
     // В этом методе должны происходить действия, которые требуют наличия DOM-узлов.
@@ -31,7 +46,8 @@ const CharList = (props) => {
     const onRequest = (offset, initial) => {
         initial ? setNewItemLoading(true) : setNewItemLoading(true);
         getAllCharacters(offset) //если не задан offset, то используется опциональный параметр в данном методе
-            .then(onCharListLoaded); //если получаем результат, то вызываем onCharListLoaded и передаем в него результат
+            .then(onCharListLoaded) //если получаем результат, то вызываем onCharListLoaded и передаем в него результат
+            .then(() => setProcess('confirmed')); //устанавливаем состояние выполнено после загрузки всех данныъ
     };
 
     const onCharListLoaded = (newCharList) => {
@@ -109,17 +125,20 @@ const CharList = (props) => {
         );
     }
 
-    const items = renderItems(charList);
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
+    //создаем для того, чтобы не было лишних перерендеров в выборе элемента
+    const elements = useMemo(() => {
+        return setContent(process, () => renderItems(charList), newItemLoading);
+    }, [process]);
+
+    // const items = renderItems(charList);
+    // const errorMessage = error ? <ErrorMessage /> : null;
+    // const spinner = loading ? <Spinner /> : null;
     //const content = !(loading || error) ? items : null; удалим, потому что постоянно из-за этого перерендеривается компонент
 
     //вместо content добавим items, чтобы компонент не перерендеривался за счет использования useRef
     return (
         <div className="char__list">
-            {spinner}
-            {errorMessage}
-            {items}
+            {elements}
             <button
                 className="button button__main button__long"
                 disabled={newItemLoading}
